@@ -1,0 +1,79 @@
+n = 9
+nm = 3
+nk = 81
+
+newtype Int3d = Int3d([[[Int]]])
+newtype Int2d = Int2d([[Int]])
+newtype LInt = LInt([Int])
+newtype Pair = Pair(Int,Int)
+newtype LPair = LPair([Int])
+
+-------------------------------------------
+-- IO function
+
+intArray :: Int -> IO [[Int]]
+intArray 0 = return []
+intArray x = do
+    str <- getLine
+    nextInt <- intArray (x - 1)
+    let int = map read (words str)::[Int]
+    return (int:nextInt)
+    
+-------------------------------------------
+-- Conversion function
+convert_matrix_to_pair_list :: [[Int]] -> [(Int,Int,Int)]
+convert_matrix_to_pair_list x 
+        = map (\(i,j)->(i,j,(x !! i) !! j)) sort
+         where indx  = [(i,j) | i<-[0..(n-1)],j<-[0..(n-1)]]
+               sort     = filter (\ (ii,jj) ->  0 /= (x !! ii) !! jj) indx
+
+convert_matrix_to_stroke_list :: [[Int]] -> [(Int,Int)]
+convert_matrix_to_stroke_list x 
+        = map (\(i,j)->(i*n+j,(x !! i) !! j)) sort
+         where indx  = [(i,j) | i<-[0..(n-1)],j<-[0..(n-1)]]
+               sort  = filter (\ (ii,jj) ->  0 /= (x !! ii) !! jj) indx
+
+convert_listn_to_pair::Int->(Int,Int)
+convert_listn_to_pair x = (x `div` n,x `mod` n)
+
+convert_listn_pair_to_listn::(Int,Int)->Int
+convert_listn_pair_to_listn (x,y) = x*n+y
+
+---------------------------------------------------
+-- Main function
+
+gen_stroke_list:: Int -> Int-> [Int]
+-- column
+gen_stroke_list 1 p =  [i*n+p| i<-[0..(n-1)]]
+-- strokes
+gen_stroke_list 2 p =  [p*n+i| i<-[0..(n-1)]]
+-- quadrant
+gen_stroke_list 3 p =  [ convert_listn_pair_to_listn (i+3*(p `div` nm),j+3*(p `mod` nm))| i<-[0..(nm-1)],j<-[0..(nm-1)] ]
+
+delete_from_list::[Int]->Int->[Int]
+delete_from_list t2d zz = filter (\x -> x/=zz) t2d
+
+delete_from_cell__::[[Int]]->(Int,Int)->[[Int]]
+delete_from_cell__ t3d (zz,zp) = [if i==zp then (delete_from_list (t3d!!i) zz) else (t3d!!i)|i<-[0..(nk-1)] ]
+
+add_cell::[[Int]]->Int->Int->[[Int]]
+add_cell t3d (zp,zz) = delete_from_cell__ t3d zz zp 
+
+init_table ::  [[Int]]
+init_table = replicate nk [1,2..9]
+
+main :: IO ()
+main =  do
+
+mat<- intArray (n)
+print mat
+let list_matrix = convert_matrix_to_pair_list mat
+print list_matrix
+let gen_list=gen_stroke_list 3 3
+print gen_list
+let list_matrix2 = convert_matrix_to_stroke_list mat
+print list_matrix2
+let table3d = init_table
+print table3d
+let table3d1 = add_cell table3d 1 (1,2)
+print table3d1
