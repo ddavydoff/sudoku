@@ -2,12 +2,6 @@ n = 9
 nm = 3
 nk = 81
 
-newtype Int3d = Int3d([[[Int]]])
-newtype Int2d = Int2d([[Int]])
-newtype LInt = LInt([Int])
-newtype Pair = Pair(Int,Int)
-newtype LPair = LPair([Int])
-
 -------------------------------------------
 -- IO function
 
@@ -38,6 +32,9 @@ convert_matrix_to_stroke_list x
 convert_listn_to_pair::Int->(Int,Int)
 convert_listn_to_pair x = (x `div` n,x `mod` n)
 
+fx = \x -> \p -> x+3*(p `div` nm)
+fy = \x -> \p -> x+3*(p `mod` nm)
+
 ---------------------------------------------------
 -- Main function
 
@@ -47,21 +44,39 @@ gen_stroke_list 1 p =  [ i*n+p| i<-[0..(n-1)] ]
 -- strokes
 gen_stroke_list 2 p =  [ p*n+i| i<-[0..(n-1)] ]
 -- quadrant
-gen_stroke_list 3 p =  [ convert_listn_pair_to_listn (i+3*(p `div` nm),j+3*(p `mod` nm))| i<-[0..(nm-1)],j<-[0..(nm-1)] ]
+gen_stroke_list 3 p =  [ convert_listn_pair_to_listn (fx i p,fy j p) | i<-[0..(nm-1)],j<-[0..(nm-1)] ]
 
-gen_stroke_list_w:: Int -> (Int,Int)-> [Int]
+gen_stroke_list_w:: Int -> Int -> (Int,Int)-> [Int]
 -- column
-gen_stroke_list_w 1 p (x,y) =  [ i*n+p| i<-[0..(n-1)] ]
+gen_stroke_list_w 1 p (x,y) =  [ i*n+p| i<-[0..(n-1)],i/=x ]
 -- strokes
-gen_stroke_list_w 2 p (x,y) =  [ p*n+i| i<-[0..(n-1)] ]
+gen_stroke_list_w 2 p (x,y) =  [ p*n+i| i<-[0..(n-1)],i/=y ]
 -- quadrant
-gen_stroke_list_w 3 p (x,y) =  [ convert_listn_pair_to_listn (i+3*(p `div` nm),j+3*(p `mod` nm))| i<-[0..(nm-1)],j<-[0..(nm-1)] ]
+gen_stroke_list_w 3 p (x,y) =  [ convert_listn_pair_to_listn (fx i p,fy j p) | i<-[0..(nm-1)],j<-[0..(nm-1)],((fx i p)/=x)||((fy j p)/=y) ]
+
+gen_stroke_list_wl:: Int -> Int -> Int-> [Int]
+-- column
+gen_stroke_list_wl 1 p c =  [ i*n+p| i<-[0..(n-1)],i/=(c `div` n) ]
+-- strokes
+gen_stroke_list_wl 2 p c =  [ p*n+i| i<-[0..(n-1)],i/=(c `mod` n) ]
+-- quadrant
+gen_stroke_list_wl 3 p c =  [ convert_listn_pair_to_listn (fx i p,fy j p) | i<-[0..(nm-1)],j<-[0..(nm-1)],((fx i p)/=(c `div` n))||((fy j p)/=(c `mod` n)) ]
+                            
 
 delete_from_list::[Int]->Int->[Int]
 delete_from_list t2d zz = filter (\x -> x/=zz) t2d
 
 delete_from_cell__::[[Int]]->(Int,Int)->[[Int]]
 delete_from_cell__ t3d (zz,zp) = [if i==zp then (delete_from_list (t3d!!i) zz) else (t3d!!i)|i<-[0..(nk-1)] ]
+
+
+get_quad :: (Int,Int) -> Int
+get_quad (x,y) = (x `div` nm)*nm + y `div` nm
+
+get_quad_l :: Int -> Int
+get_quad_l p = (x `div` nm)*nm + y `div` nm
+                where 
+                    (x,y)=convert_listn_to_pair p
 
 add_cell::[[Int]]->(Int,Int)->[[Int]]
 add_cell t3d (zp,zz) = delete_from_cell__ t3d (zz,zp) 
@@ -84,6 +99,8 @@ let gen_list=gen_stroke_list 3 3
 print gen_list
 let list_matrix2 = convert_matrix_to_stroke_list mat
 print list_matrix2
+let gen_list2=gen_stroke_list_w 3 3 (3,2)
+print gen_list2
 let table3d = init_table
 print table3d
 let table3d1 = add_cell table3d (1,2)
