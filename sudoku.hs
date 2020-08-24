@@ -1,6 +1,7 @@
 import Data.List
 import Debug.Trace
 
+-------------------------------------------
 
 type Mat2d a = [[a]]
 type MatInt2d = Mat2d Int
