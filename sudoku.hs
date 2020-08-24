@@ -1,4 +1,5 @@
 import Data.List
+import Debug.Trace
 
 n = 9
 nm = 3
@@ -113,14 +114,14 @@ delete_from_list::[Int]->Int->[Int]
 delete_from_list t2d zz = filter (\x -> x/=zz) t2d
 
 delete_from_cell__::[[Int]]->(Int,Int)->[[Int]]
-delete_from_cell__ t3d (zz,zp) = [if i==zp then (delete_from_list (t3d!!i) zz) else (t3d!!i) | i<-[0..(nk-1)] ]
+delete_from_cell__ t3d (zz,zp) = [if i==zp then (delete_from_list (t3d!!i) zz) else (t3d!!i) | i<-[0..nk-1] ]
 
 delete_from_cell_::[[Int]]->[(Int,Int)]->[[Int]]
 delete_from_cell_ t3d [] = t3d
 delete_from_cell_ t3d (x:xs) = delete_from_cell_ (delete_from_cell__ t3d x) xs
 
 set_to_cell__::[[Int]]->(Int,Int)->[[Int]]
-set_to_cell__ t3d (zz,zp) = [if i==zp then [zz] else (t3d!!i)|i<-[0..(nk-1)] ]
+set_to_cell__ t3d (zz,zp) = [if i==zp then [zz] else (t3d!!i)|i<-[0..nk-1] ]
 
 add_cell::[[Int]]->(Int,Int)->[[Int]]
 add_cell t3d (zp,zz) = delete_from_cell_ t3d1 (map   (\x -> (zz,x)) listxyz)
@@ -135,7 +136,32 @@ is_correct::[[Int]]->Bool
 is_correct []=True
 is_correct (x:xs)=(length(x)/=0)&&is_correct(xs)
 
-init_table ::  [[Int]]
+is_solve::[[Int]]->Bool
+is_solve []=True
+is_solve (x:xs)=(length(x)==1)&&is_solve(xs)
+
+solve_::[[Int]]->Int->[Int]->[[Int]]
+solve_ t3d ind [] = t3d
+solve_ t3d ind (x:xs) = if is_solve(t3d5)==True then t3d5 else solve_ t3d ind xs
+                        where
+                                t3d4 = add_cell_list t3d [(ind,x)]
+                                f4 = convert_matrix3d_to_stroke_list t3d4
+                                t3d5 = solve t3d4 f4
+
+solve::[[Int]]->[(Int,Int)]->[[Int]]
+solve t3d listm = if is_correct(t3d3)/=True then t3d else
+                    if is_solve(t3d3)==True then t3d3 else
+                                solve_ t3d3 indexfh t3ds
+                    where
+                    f=convert_matrix3d_to_stroke_list t3d
+                    e =foldl (flip delete) f listm
+                    t3d3 = if (length(e)/=0) then (add_cell_list t3d e) else t3d
+                    len=minimum (map length t3d)
+                    indx = [i|i<-[0..n-1]]
+                    indexf=filter(\ii -> length(t3d3!!ii)==len) indx
+                    indexfh= head (indexf)
+                    t3ds=t3d3!!indexfh
+
 init_table = replicate nk [1,2..9]
 
 main :: IO ()
@@ -147,15 +173,19 @@ let list_matrix = convert_matrix_to_pair_list mat
 let list_matrix2 = convert_matrix_to_stroke_list mat
 --putStrLn ( print_mat2d list_matrix2 )
 -------------------------------------------------------------
+--let table3d = init_table
+--let table3d2 = add_cell_list table3d list_matrix2
+--putStrLn ( print_mat3d table3d2 )
+--let f=convert_matrix3d_to_stroke_list table3d2
+--print f
+--let e =foldl (flip delete) f list_matrix2
+--print e
+--let table3d3 = add_cell_list table3d2 e
+--putStrLn ( print_mat3d table3d3 )
+-------------------------------------------------------------
+--let g=convert_matrix3d_to_stroke_list table3d3
+--print g
 let table3d = init_table
 let table3d2 = add_cell_list table3d list_matrix2
-putStrLn ( print_mat3d table3d2 )
-let f=convert_matrix3d_to_stroke_list table3d2
-print f
-let e =foldl (flip delete) f list_matrix2
-print e
-let table3d3 = add_cell_list table3d2 e
-putStrLn ( print_mat3d table3d3 )
--------------------------------------------------------------
-let g=convert_matrix3d_to_stroke_list table3d3
-print g
+let s=solve table3d2 list_matrix2
+putStrLn ( print_mat3d s )
