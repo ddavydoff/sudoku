@@ -16,10 +16,9 @@ type ListPInt = ListP Int
 
 -------------------------------------------
 -- Constant
-
-n = 9
-nm = 3  
-nk = 81 
+n  =  9::Int
+nm =  3::Int  
+nk = 81::Int 
 
 -------------------------------------------
 -- IO function
@@ -37,14 +36,13 @@ addSpaces 0 = ""
 addSpaces n = " " ++ addSpaces (n-1) 
     
 show_2d_ :: ListMInt -> String
-show_2d_ x = foldr (++) "" (map (\s -> "        " ++ show s  ++ " ") x)
-              
+show_2d_ rs = foldr (++) "" (map (\s -> "       " ++ show s  ++ " ") rs)
+
 print_mat2d :: [[Int]] -> String
 print_mat2d x = foldr (++) "" (map (\s -> (show_2d_ s) ++ "\n")  x)
 
 show_2d :: MatInt2d -> String
-show_2d [] = ""
-show_2d (x:xs) = addSpaces (n-length(dds)) ++ dds ++ " " ++ show_2d (xs) where dds = foldr (++) "" (map show x)
+show_2d x = foldr (++) "" (map (\x -> addSpaces (n-length(x)) ++ x) (map (\xx -> foldr (++) "" (map show xx) ++ " ") x))
 
 print_mat3d :: MatInt2d -> String
 print_mat3d [] = ""
@@ -66,11 +64,13 @@ convert_matrix3d_to_stroke_list x
                sort  = filter (\ ii ->  length(x !! ii)==1) indx
 
 conv_p2l = \x -> \y -> x*n+y
-conv_l2p = \x -> (x `div` n,x `mod` n)
+conv_l2p = \x -> (divn x,modn x)
 fx = \x -> \p -> x+3*((get_quad_l p) `div` nm)
 fy = \x -> \p -> x+3*((get_quad_l p) `mod` nm)
 get_quad = \(x,y) -> (x `div` nm)*nm + y `div` nm
 get_quad_l = \p -> (\(x,y) -> (x `div` nm)*nm + y `div` nm )(conv_l2p p)
+divn = \p -> p `div` n
+modn = \p -> p `mod` n 
 
 ---------------------------------------------------
 -- Function opeartion with matrix
@@ -78,27 +78,26 @@ get_quad_l = \p -> (\(x,y) -> (x `div` nm)*nm + y `div` nm )(conv_l2p p)
 init_table = replicate nk [1,2..9]
 
 gen_stroke_list_wl:: Int -> [Int]
-gen_stroke_list_wl p =  [ i*n+(p `mod` n)| i<-[0..n-1],i/=(p `div` n) ]++
-                        [ (p `div` n)*n+i| i<-[0..n-1],i/=(p `mod` n) ]++
-                        [ conv_p2l (fx i p) (fy j p) | i<-[0..nm-1],j<-[0..nm-1],((fx i p)/=(p `div` n))||((fy j p)/=(p `mod` n)) ]
+gen_stroke_list_wl p =  [ i*n+(p `mod` n)| i<-[0..n-1],i/=(divn p) ]++
+                        [ (p `div` n)*n+i| i<-[0..n-1],i/=(modn p) ]++
+                        [ conv_p2l (fx i p) (fy j p) | i<-[0..nm-1],j<-[0..nm-1],((fx i p)/=(divn p))||((fy j p)/=(modn p)) ]
 
-delete_from_cell__::MatInt2d->(Int,Int)->[[Int]]
-delete_from_cell__ t3d (zz,zp) = [if i==zp then (delete zz (t3d!!i)) else (t3d!!i) | i<-[0..nk-1] ]
+delete_from_c__::MatInt2d->(Int,Int)->[[Int]]
+delete_from_c__ t3d (zz,zp) = [if i==zp then (delete zz (t3d!!i)) else (t3d!!i) | i<-[0..nk-1] ]
 
-delete_from_cell_::MatInt2d->[(Int,Int)]->[[Int]]
-delete_from_cell_ t3d [] = t3d
-delete_from_cell_ t3d (x:xs) = delete_from_cell_ (delete_from_cell__ t3d x) xs
+delete_from_c_::MatInt2d->[(Int,Int)]->[[Int]]
+delete_from_c_ t3d [] = t3d
+delete_from_c_ t3d (x:xs) = delete_from_c_ (delete_from_c__ t3d x) xs
 
-set_to_cell__::MatInt2d->(Int,Int)->[[Int]]
-set_to_cell__ t3d (zz,zp) = [if i==zp then [zz] else (t3d!!i)|i<-[0..nk-1] ]
+set_to_c__::MatInt2d->(Int,Int)->[[Int]]
+set_to_c__ t3d (zz,zp) = [if i==zp then [zz] else (t3d!!i)|i<-[0..nk-1] ]
 
 add_cell::MatInt2d->(Int,Int)->[[Int]]
-add_cell t3d (zp,zz) = delete_from_cell_ (set_to_cell__ t3d (zz,zp)) (map   (\x -> (zz,x)) (gen_stroke_list_wl zp))
+add_cell t3d (zp,zz) = delete_from_c_ (set_to_c__ t3d (zz,zp)) (map   (\x -> (zz,x)) (gen_stroke_list_wl zp))
 
 add_cell_list::[[Int]]->[(Int,Int)]->[[Int]]
 add_cell_list t3d [] = t3d
 add_cell_list t3d (x:xs) = add_cell_list (add_cell t3d x) xs
---add_cell_list t3d x = foldr (add_cell) t3d x
 
 is_correct::MatInt2d->Bool
 is_correct x = foldr (&&) True (map (\x -> length(x)/=0) x)
