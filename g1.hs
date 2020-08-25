@@ -3,12 +3,10 @@ import Data.Set
 import Graphics.Gloss
 import Graphics.Gloss.Data.ViewPort
 import Graphics.Gloss.Interface.Pure.Game
-import System.Random
 
 main :: IO ()
 main = do
-    gen <- getStdGen
-    startGame gen
+    startGame
 
 fieldSize@(fieldWidth, fieldHeight) = (27, 16) :: (Int, Int)
 
@@ -26,18 +24,17 @@ data CellState = Int
 data GameState = GS
     { field1    :: Field
     , field2    :: Field
-    , gameOver :: Bool
+    , gameOver  :: Bool
     }
 
-startGame :: StdGen -> IO ()
-startGame gen = play (InWindow "SUDOKU" windowSize (240, 160)) white 30 (initState gen) renderer handler updater
+startGame :: IO ()
+startGame = play (InWindow "SUDOKU" windowSize (240, 160)) white 30 (initState) renderer handler updater
 windowSize = both (* (round cellSize)) fieldSize
 cellSize = 24 :: Float
-
-initState gen = GS createField1 createField2  False
+initState = GS createField1 createField2  False
 
 both :: (a -> b) -> (a, a) -> (b, b)
-both f (a, b) = (f a, f b) --вспомогательная функция, которая ещё пригодится 
+both f (a, b) = (f a, f b) 
 
 updater _ = id
 
