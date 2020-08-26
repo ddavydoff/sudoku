@@ -1,3 +1,19 @@
+-- |
+-- Module      : Sudoku
+-- License     : Freeware
+-- Maintainer  : Denis Davydoff (dendavydoff@gmail.com)
+-- Stability   : Stable
+-- Portability : Excellent
+--
+-- Sudoku solver
+--
+
+{-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+
+module Sudoku (solver, print_mat2d, MatInt2d) where
+
+
 import Data.List
 import Debug.Trace
 
@@ -65,7 +81,7 @@ convert_matrix3d_to_stroke_list x
 
 convert_matrix3d_to_matrix :: MatInt2d -> MatInt2d
 convert_matrix3d_to_matrix mat 
-        = [[ if (length(mat!!(conv_p2l i j))==1) then head (mat!!(conv_p2l i j)) else 0 | i<-[0..n-1]]|j<-[0..n-1] ]
+        = [[ if (length(mat!!(conv_p2l j i))==1) then head (mat!!(conv_p2l j i)) else 0 | i<-[0..n-1]]|j<-[0..n-1] ]
 
 conv_p2l = \x -> \y -> x*n+y
 conv_l2p = \x -> (divn x,modn x)
@@ -134,11 +150,6 @@ solve t3d listm = if is_correct(t3d3) /= True then t3d else
                     indexfh = head (indexf)
                     t3ds = (t3d3!!indexfh)
 
-mat = [[ 0, 0, 0, 0, 0, 0, 4, 0, 0], [ 3, 0, 6, 0, 0, 0, 0, 0, 0], [ 0, 0, 0, 1, 9, 6, 0, 3, 0], [ 0, 7, 0, 0, 0, 0, 0, 1, 0], [ 8, 0, 0, 2, 5, 0, 0, 9, 0], [ 0, 4, 0, 0, 0, 0, 8, 0, 0], [ 0, 6, 0, 4, 0, 9, 0, 0, 8], [ 0, 0, 5, 0, 0, 0, 0, 2, 0], [ 0, 0, 0, 5, 0, 0, 0, 0, 7]]::MatInt2d
+solver::MatInt2d->MatInt2d
+solver mat = convert_matrix3d_to_matrix (solve (add_cell_list init_table (convert_matrix_to_stroke_list mat)) (convert_matrix_to_stroke_list mat) )
 
-
-main :: IO ()
-main =  do
---mat<- intArray (n)
-putStrLn (print_mat2d mat)
-putStrLn ( print_mat2d(convert_matrix3d_to_matrix (solve (add_cell_list init_table (convert_matrix_to_stroke_list mat)) (convert_matrix_to_stroke_list mat) )))
