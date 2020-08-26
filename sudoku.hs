@@ -36,7 +36,7 @@ addSpaces 0 = ""
 addSpaces n = " " ++ addSpaces (n-1) 
     
 show_2d_ :: ListMInt -> String
-show_2d_ rs = foldr (++) "" (map (\s -> "       " ++ show s  ++ " ") rs)
+show_2d_ rs = foldr (++) "" (map (\s -> "      " ++ show s  ++ "") rs)
 
 print_mat2d :: [[Int]] -> String
 print_mat2d x = foldr (++) "" (map (\s -> (show_2d_ s) ++ "\n")  x)
@@ -62,6 +62,10 @@ convert_matrix3d_to_stroke_list x
         = map (\i->(i,(x !! i) !! 0)) sort
          where indx  = [i | i<-[0..nk-1]]
                sort  = filter (\ ii ->  length(x !! ii)==1) indx
+
+convert_matrix3d_to_matrix :: MatInt2d -> MatInt2d
+convert_matrix3d_to_matrix mat 
+        = [[ if (length(mat!!(conv_p2l i j))==1) then head (mat!!(conv_p2l i j)) else 0 | i<-[0..n-1]]|j<-[0..n-1] ]
 
 conv_p2l = \x -> \y -> x*n+y
 conv_l2p = \x -> (divn x,modn x)
@@ -130,13 +134,11 @@ solve t3d listm = if is_correct(t3d3) /= True then t3d else
                     indexfh = head (indexf)
                     t3ds = (t3d3!!indexfh)
 
+mat = [[ 0, 0, 0, 0, 0, 0, 4, 0, 0], [ 3, 0, 6, 0, 0, 0, 0, 0, 0], [ 0, 0, 0, 1, 9, 6, 0, 3, 0], [ 0, 7, 0, 0, 0, 0, 0, 1, 0], [ 8, 0, 0, 2, 5, 0, 0, 9, 0], [ 0, 4, 0, 0, 0, 0, 8, 0, 0], [ 0, 6, 0, 4, 0, 9, 0, 0, 8], [ 0, 0, 5, 0, 0, 0, 0, 2, 0], [ 0, 0, 0, 5, 0, 0, 0, 0, 7]]::MatInt2d
+
 
 main :: IO ()
 main =  do
-
 --mat<- intArray (n)
-let mat = [[ 0, 0, 0, 0, 0, 0, 4, 0, 0], [ 3, 0, 6, 0, 0, 0, 0, 0, 0], [ 0, 0, 0, 1, 9, 6, 0, 3, 0], [ 0, 7, 0, 0, 0, 0, 0, 1, 0], [ 8, 0, 0, 2, 5, 0, 0, 9, 0], [ 0, 4, 0, 0, 0, 0, 8, 0, 0], [ 0, 6, 0, 4, 0, 9, 0, 0, 8], [ 0, 0, 5, 0, 0, 0, 0, 2, 0], [ 0, 0, 0, 5, 0, 0, 0, 0, 7]]
-
-let list_matrix2=convert_matrix_to_stroke_list mat
 putStrLn (print_mat2d mat)
-putStrLn ( print_mat3d (solve (add_cell_list init_table list_matrix2) list_matrix2 ))
+putStrLn ( print_mat2d(convert_matrix3d_to_matrix (solve (add_cell_list init_table (convert_matrix_to_stroke_list mat)) (convert_matrix_to_stroke_list mat) )))

@@ -6,37 +6,40 @@ import Graphics.Gloss.Interface.Pure.Game
 
 main :: IO ()
 main = do
-    startGame
+    startSudoku
 
 fieldSize@(fieldWidth, fieldHeight) = (27, 16) :: (Int, Int)
 
 createField1 :: Field
-createField1 = Data.Map.empty
+createField1 = [[0]]
 
 createField2 :: Field
-createField2 = Data.Map.empty
+createField2 = [[0]]
 
-type Field = Map Cell CellState 
-type Cell = (Int, Int)
+type Field = [[Int]]
+--type Cell = (Int, Int)
 
-data CellState = Int
+--data CellState = Int
 
-data GameState = GS
+data SudokuState = GS
     { field1    :: Field
     , field2    :: Field
     , gameOver  :: Bool
     }
 
-startGame :: IO ()
-startGame = play (InWindow "SUDOKU" windowSize (240, 160)) white 30 (initState) renderer handler updater
+startSudoku :: IO ()
+
+startSudoku = play (InWindow "SUDOKU" windowSize (240, 160)) white 30 (initState) renderer handler updater
 windowSize = both (* (round cellSize)) fieldSize
 cellSize = 24 :: Float
+
 initState = GS createField1 createField2  False
 
 both :: (a -> b) -> (a, a) -> (b, b)
 both f (a, b) = (f a, f b) 
 
 updater _ = id
+--handler _ = id
 
 cellToScreen = both ((* cellSize) . fromIntegral)
 
